@@ -1,0 +1,47 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: kubectl-noprobes
+    binary: kubectl-noprobes
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - id: kubectl-noprobes
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "kubectl-noprobes_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+krews:
+  - name: noprobes
+    repository:
+      owner: vinayus
+      name: krew-index
+      branch: "noprobes-{{ .Version }}"
+      pull_request:
+        enabled: true
+        base:
+          owner: kubernetes-sigs
+          name: krew-index
+          branch: master
+    homepage: https://github.com/vinayus/kubectl-noprobes
+    description: Lists pods and containers missing liveness or readiness probes.
+    short_description: Find pods missing liveness or readiness probes.
+    skip_upload: false
