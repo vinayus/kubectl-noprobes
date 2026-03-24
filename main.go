@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -9,10 +11,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"context"
 )
 
 func main() {
+	namespace := flag.String("n", "default", "namespace to check (use \"\" for all namespaces)")
+	flag.Parse()
+
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	configOverrides := &clientcmd.ConfigOverrides{}
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
@@ -29,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pods, err := clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{})
+	pods, err := clientset.CoreV1().Pods(*namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error listing pods: %v\n", err)
 		os.Exit(1)
